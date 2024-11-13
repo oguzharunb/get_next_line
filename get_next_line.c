@@ -1,63 +1,73 @@
-#include "get_next_line.h"
-#include <stdlib.h>
+#include <fcntl.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <limits.h>
+#include "get_next_line.h"
 
-char	*cat_alctd_to_left(char *left_string, char *new_string)
+size_t	ft_strlen(char *string)
 {
-	char *new_left_string;
-	
-	new_left_string = ft_strjoin(left_string, new_string);
-	if (!new_left_string)
-		return (NULL);
-	free(left_string);
-	free(new_string);
-	return (new_left_string);
+	size_t	i;
+	while (string[i])
+		i++;
+	return (i);
 }
 
-void	free_all_lefts(char **lefts)
+static void	free_strings(char *left_string_list)
 {
-	int	i;
+	size_t	i;
 
 	i = 0;
 	while (i < OPEN_MAX)
 	{
-		if (lefts[i])
-			free(lefts[i]);
+		if (left_string_list[i])
+			free(left_string_list[i]);
 		i++;
 	}
 }
 
 char	*get_next_line(int fd)
 {
-	static char	*left_s_list[OPEN_MAX];
-	char		*allocated;
-	ssize_t		ret;
-	int			i;
+	static char	*left_string[OPEN_MAX];
+	char		*new_string;
 	char		*new_line_loc;
+	char		*tmp;
+	int			ret;
 
-	allocated = malloc((BUFFER_SIZE + 1) * sizeof(char));
-	
+	allocated = malloc(BUFFER_SIZE + 1);
 	if (!allocated)
 		return (NULL);
 	ret = read(fd, allocated, BUFFER_SIZE);
-	//if 0 end of file
-	//if -1 couldnt read the file
-	//if >0 read the file
-	new_line_loc = ft_strchr(allocated, '\n');
-	if (!new_line_loc)
+	if (ret == -1)
 	{
-		left_s_list[fd] = cat_alctd_to_left(left_s_list[fd], allocated);
-		if (left_s_list[fd])
+		free_strings(left_string[fd]);
+		free(allocated);
+		return (NULL);
+	}
+	else if (!ret)
+		new_line_loc = ft_strchr(allocated, '\0');
+	else
+		new_line_loc = ft_strchr(allocated, '\n');
+//--------------------------------
+	// found new line!
+	if (new_line_loc)
+	{
+		if (!left_string[fd])
 		{
-			free_all_lefts(left_s_list);
-			return (NULL);
+			if (ft_strlen(allocated) == new_line_loc - allocated)
+				return (allocated);
+			else
+			{
+				ft_substr(allocated, new_line_loc + 1, allocated - new_line_loc);
+			}
 		}
-		return (get_next_line(fd));
+		else if ()
 	}
 	else
 	{
-		left_s_list[fd] = ft_memdup(new_line_loc + 1, ret - (new_line_loc - allocated));
-		return (ft_substr(allocated, 0, new_line_loc - allocated));
+		tmp = ft_strjoin(left_string[fd], allocated);
+		free(left_string[fd]);
+		free(allocated);
+		left_string[fd] = tmp;
+		return (get_next_line(fd));
 	}
 }
