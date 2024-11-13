@@ -57,7 +57,8 @@ char	*get_next_line(int fd)
 				return (allocated);
 			else
 			{
-				ft_substr(allocated, new_line_loc + 1, allocated - new_line_loc);
+				left_string[fd] = ft_substr(allocated, new_line_loc + 1, );
+				tmp = ft_substr(allocated, );
 			}
 		}
 		else if ()
